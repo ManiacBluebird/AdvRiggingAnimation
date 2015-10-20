@@ -1,0 +1,60 @@
+joint -p 2 15 0;
+joint -p 1 8 0;
+joint -e -zso -oj xyz -sao yup joint1;
+joint -p 2 0 0;
+joint -e -zso -oj xyz -sao yup joint2;
+joint -p 1 0 2;
+joint -e -zso -oj xyz -sao yup joint3;
+
+CreateNURBSCircle;
+rename "nurbsCircle1" "ikCtrl";
+
+
+select -r joint1;
+rename "joint1" "hipJoint";
+$myJoints = `ls -sl`;
+xform -r -ro 260 15 -3 $myJoints;
+
+select -r joint2;
+rename "joint2" "kneeJoint";
+$myJoints = `ls -sl`;
+xform -r -ro 180 -7 6 $myJoints;
+
+select -r joint3;
+rename "joint3" "ankleJoint";
+$myJoints = `ls -sl`;
+xform -r -ro 150 60 150 $myJoints;
+
+select -r joint4;
+rename "joint4" "footJoint";
+$myJoints = `ls -sl`;
+xform -r -ro 0 0 -118 $myJoints;
+
+select -cl;
+select hipJoint;
+select -hi;
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;
+
+IKHandleTool;
+select -d hipJoint;
+select -r hipJoint.rotatePivot;
+select -add ankleJoint.rotatePivot;
+
+
+
+select -r ankleJoint;
+select -tgl ikCtrl;
+
+doCreatePointConstraintArgList 1 { "0","0","0","0","0","0","0","1","","1" };
+pointConstraint -offset 0 0 0 -weight 1;
+
+select -r ikCtrl_pointConstraint1 ;
+Delete ikCtrl_pointConstraint1 ;
+
+
+select -r ikCtrl;
+select -tgl ikHandle1;
+
+doCreateParentConstraintArgList 1 { "1","0","0","0","0","0","0","1","","1" };
+parentConstraint -mo -weight 1;
